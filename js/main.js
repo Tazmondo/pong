@@ -21,14 +21,14 @@ function rtd(radians) {
 
 let pscore = 0
 
-let scoreCounters = document.querySelectorAll('.score')
+let scoreCounter = document.querySelector('.scores .score')
 function incrementScore(){
     pscore += 1
-    scoreCounters.forEach(v => v.textContent = pscore)
+    scoreCounter.textContent = pscore
 }
 function resetScore() {
     pscore = 0
-    scoreCounters.forEach(v => v.textContent = pscore)
+    scoreCounter.textContent = pscore
 }
 
 /**
@@ -162,10 +162,10 @@ const ball =(() => {
                     if (allowance === true) {
                         allowance = false
                     } else{
+                        gameOver()
                         resetPos()
                         resetScore()
                         velocity = DEFAULTVELOCITY
-                        gameOver()
                     }
                 }
             } else if (x > canvas.width - PONGWIDTH) {
@@ -201,18 +201,21 @@ let startDiv = document.querySelector('div.message.start')
 let startButton = document.querySelector('button.start-game')
 startButton.addEventListener('click', e => {
     startDiv.classList.toggle('hidden', true)
-    setTimeout(() => playing = true, 1500)
+    setTimeout(() => playing = true, 500)
 })
 
 let gameOverDiv = document.querySelector('div.message.game-over')
 let gameOverButton = document.querySelector('button.game-over')
+let scoreText = document.querySelector('.message.game-over .score')
 gameOverButton.addEventListener('click', e => {
     gameOverDiv.classList.toggle('hidden', true)
-    setTimeout(() => playing = false, 1500)
+    setTimeout(() => playing = true, 500)
 })
 function gameOver() {
     playing = false
+    scoreText.textContent = pscore
     gameOverDiv.classList.toggle('hidden', false)
+    gameOverButton.focus()
 }
 
 setInterval(() => {
