@@ -8,6 +8,7 @@ const PONGHEIGHT = 60
 const PONGWIDTH = 10
 const BALLSIZE = 5
 const DEFAULTVELOCITY = 2
+const GHOSTVELOCITY = 4
 const VELINCREMENT = 0.2
 const TICKRATE = 1000/300
 
@@ -117,9 +118,15 @@ function Pong(player1) {
                 if (y < 0) y = 0
                 else if (y > canvas.height-height) y = canvas.height-height
             } else {
-                y = ball.getY() - height/2
-                if (y < 0) y = 0
-                else if (y > canvas.height-height) y = canvas.height-height
+                if (ghostBall) {
+                    y = ghostBall.getY() - height/2
+                    if (y < 0) y = 0
+                    else if (y > canvas.height-height) y = canvas.height-height
+                } else if(ball.getAngle() > 180 || ball.getAngle() < 0) {
+                    y = ball.getY() - height/2
+                    if (y < 0) y = 0
+                    else if (y > canvas.height-height) y = canvas.height-height
+                }
             }
             ctx.fillStyle = getColor()
             ctx.fillRect(x, y, width, height)
@@ -130,15 +137,16 @@ function Pong(player1) {
     }
 }
 
-const ball =(() => {
+function Ball(ghost, sangle, spos) {
     let width = BALLSIZE
     let height = BALLSIZE
 
-    let x = canvas.width - PONGWIDTH - BALLSIZE;
-    let y = (canvas.height / 2) + (PONGHEIGHT / 2);
-    let velocity = DEFAULTVELOCITY
-    let angle = 240
+    let x = ghost ? spos[0] : canvas.width - PONGWIDTH - BALLSIZE;
+    let y = ghost ? spos[1] : (canvas.height / 2) + (PONGHEIGHT / 2);
+    let velocity = ghost ? GHOSTVELOCITY : DEFAULTVELOCITY
+    let angle = ghost ? sangle : Math.random() * 180 + 180
     let allowance = true
+    let prevx = x
 
     function getBBox() {
         return [
@@ -155,6 +163,7 @@ const ball =(() => {
         y = (canvas.height / 2) + (PONGHEIGHT / 2)
         ctx.fillStyle = '#fff'
         ctx.fillRect(x, y, width, height)
+        angle = Math.random() * 180 + 180
     }
 
     function tick() {
@@ -178,6 +187,7 @@ const ball =(() => {
                     velocity += VELINCREMENT
                     incrementScore()
                     pong1.touched()
+                    if (!ghost) ghostBall = Ball(true, angle, [x, y])
                 } else {
                     if (allowance === true) {
                         allowance = false
@@ -185,37 +195,64 @@ const ball =(() => {
                         gameOver()
                         resetPos()
                         resetScore()
+                        angle = Math.random() * 180 + 180
                         velocity = DEFAULTVELOCITY
+                        ghostBall = undefined
                     }
                 }
             } else if (x > canvas.width - PONGWIDTH) {
-                if (collides(getBBox(), pong2.getBBox())) { // remove me and add scoring
+                if (collides(getBBox(), pong2.getBBox())) {
+                    if (!ghost) {
+                        let middle = pong2.getY() + pong2.height/2
+                        let offset = y - middle
+                        let scale = (offset / (pong1.height/2))*-1
+                        angle = 360 - (scale + 1) * 90
+                        pong2.touched()
+                    } else {
+                        ghostBall = undefined
+                    }
                     // console.log("a");
-                    let middle = pong2.getY() + pong2.height/2
-                    let offset = y - middle
-                    let scale = (offset / (pong1.height/2))*-1
-                    angle = 360 - (scale + 1) * 90
-                    pong2.touched()
+                } else {
+                    if (!ghost) {
+                        win()
+                        resetPos()
+                        resetScore()
+                        angle = Math.random() * 180 + 180
+                        velocity = DEFAULTVELOCITY
+                        ghostBall = undefined
+                    }
                 }
                 x = canvas.width - PONGWIDTH
             }
-            // Angles that are too steep are annoying/unfun
-            if (angle >= 0 && angle < 30) angle = 30
-            if (angle > 160 && angle <= 180) angle = 160
-            if (angle >= 180 && angle < 210) angle = 210
-            if (angle <= 360 && angle > 330) angle = 330
+
             // if (angle >= 90 && angle < 120) angle = 120
         }
+        // Angles that are too steep are annoying/unfun
+        if (angle >= 0 && angle < 45) angle = 45
+        if (angle > 135 && angle <= 180) angle = 135
+        if (angle >= 180 && angle < 225) angle = 225
+        if (angle <= 360 && angle > 315) angle = 315
+        if (x === prevx) resetPos()
+        prevx = x
         ctx.fillStyle = '#f00'
+        if (ghost) ctx.fillStyle = '#000000'
         ctx.fillRect(x, y, width, height)
+        if (!ghost) console.log(angle);
     }
     return {
         tick,
         getY() {
             return y
+        },
+        getAngle() {
+            return angle
         }
     }
-})()
+}
+
+const ball = Ball()
+let ghostBall;
+
 let pong1 = Pong(true)
 let pong2 = Pong(false)
 
@@ -241,6 +278,20 @@ function gameOver() {
     gameOverButton.focus()
 }
 
+let winButton = document.querySelector('.win button')
+let winDiv = document.querySelector('div.message.win')
+let winScoreText = document.querySelector('.win .score')
+winButton.addEventListener('click', e => {
+    winDiv.classList.toggle('hidden', true)
+    setTimeout(() => playing = true, 500)
+})
+function win() {
+    playing = false
+    winScoreText.textContent = pscore
+    winDiv.classList.toggle('hidden', false)
+    winButton.focus()
+}
+
 setInterval(() => {
     ctx.fillStyle = '#000'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -250,5 +301,6 @@ setInterval(() => {
     pong2.tick()
     if (playing) {
         ball.tick()
+        if (ghostBall) ghostBall.tick()
     }
 }, TICKRATE)
