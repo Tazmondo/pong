@@ -7,6 +7,9 @@ canvas.width = canvas.clientWidth
 const PONGHEIGHT = 60
 const PONGWIDTH = 10
 const BALLSIZE = 5
+const DEFAULTVELOCITY = 2
+const VELINCREMENT = 0.2
+const TICKRATE = 1000/300
 
 function dtr(degrees) {
     return degrees * (Math.PI/180)
@@ -17,7 +20,16 @@ function rtd(radians) {
 }
 
 let pscore = 0
-let aiscore = 0
+
+let scoreCounter = document.querySelector('.score')
+function incrementScore(){
+    pscore += 1
+    scoreCounter.textContent = pscore
+}
+function resetScore() {
+    pscore = 0
+    scoreCounter.textContent = pscore
+}
 
 /**
  * Check if two objects collide
@@ -54,10 +66,17 @@ function Pong(player1) {
         height,
         width,
         getBBox() {
-            return [
-                [x, y],
-                [x + width, y + height]
-            ]
+            if (player1) {
+                return [
+                    [-1000, y],
+                    [x + width, y + height]
+                ]
+            } else {
+                return [
+                    [x, y],
+                    [10000, y+height]
+                ]
+            }
         },
         tick() {
             if (player1) {
@@ -81,7 +100,7 @@ const ball =(() => {
 
     let x = canvas.width - PONGWIDTH - BALLSIZE;
     let y = (canvas.height / 2) + (PONGHEIGHT / 2);
-    let velocity = 7
+    let velocity = DEFAULTVELOCITY
     let angle = 240
     let allowance = true
 
@@ -93,11 +112,13 @@ const ball =(() => {
     }
 
     function resetPos() {
-        console.log("a2", x)
+        console.log("a2", x, velocity, angle)
 
         x = canvas.width - PONGWIDTH - BALLSIZE
         console.log("a", x)
         y = (canvas.height / 2) + (PONGHEIGHT / 2)
+        ctx.fillStyle = '#fff'
+        ctx.fillRect(x, y, width, height)
     }
 
     function tick() {
@@ -112,35 +133,31 @@ const ball =(() => {
         if (collides(getBBox(), [[-1000,0], [PONGWIDTH-1, canvas.height]]) || x > canvas.width - PONGWIDTH) {
             if (x < PONGWIDTH) {
                 if (collides(getBBox(), pong1.getBBox())) { // remove me and add scoring
-                    let incidence = 180 - (360 - angle)
-                    angle = 180 - incidence
-
                     let middle = pong1.getY() + pong1.height/2
                     let offset = y - middle
                     let scale = (offset / (pong1.height/2))*-1
                     angle = (scale + 1) * 90
                     allowance = true
-                    velocity += 1
+                    velocity += VELINCREMENT
+                    incrementScore()
                 } else {
                     if (allowance === true) {
                         allowance = false
                     } else{
-                        pscore += 1
                         resetPos()
+                        resetScore()
+                        velocity = DEFAULTVELOCITY
                     }
                 }
-                x = PONGWIDTH - 1
             } else if (x > canvas.width - PONGWIDTH) {
-                x = canvas.width - PONGWIDTH
-                if (collides(getBBox(), pong2.getBBox()) || true) { // remove me and add scoring
-                    let incidence = 180 - angle
-                    angle = 180 + incidence
-
+                if (collides(getBBox(), pong2.getBBox())) { // remove me and add scoring
+                    console.log("a");
                     let middle = pong2.getY() + pong2.height/2
                     let offset = y - middle
                     let scale = (offset / (pong1.height/2))*-1
                     angle = 360 - (scale + 1) * 90
                 }
+                x = canvas.width - PONGWIDTH
             }
             if (angle > 160 && angle <= 180) angle = 160
             if (angle >= 0 && angle < 30) angle = 30
@@ -169,4 +186,4 @@ setInterval(() => {
     pong1.tick()
     pong2.tick()
     ball.tick()
-}, 1000/60)
+}, TICKRATE)
