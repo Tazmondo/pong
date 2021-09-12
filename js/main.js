@@ -8,9 +8,10 @@ const PONGHEIGHT = 60
 const PONGWIDTH = 10
 const BALLSIZE = 5
 const DEFAULTVELOCITY = 2
-const GHOSTVELOCITY = 4
+let GHOSTVELOCITY = 3.5
 const VELINCREMENT = 0.2
 const TICKRATE = 1000/300
+const MOVESPEED = 3
 
 function dtr(degrees) {
     return degrees * (Math.PI/180)
@@ -59,7 +60,6 @@ function Pong(player1) {
         mouseY = e.offsetY
     })
 
-    const MOVESPEED = 2
     let pressed = {}
     document.addEventListener('keydown', e => {
         pressed[e.key] = true
@@ -146,7 +146,7 @@ function Ball(ghost, sangle, spos) {
     let velocity = ghost ? GHOSTVELOCITY : DEFAULTVELOCITY
     let angle = ghost ? sangle : Math.random() * 180 + 180
     let allowance = true
-    let prevx = x
+    let prevX = x
 
     function getBBox() {
         return [
@@ -192,12 +192,14 @@ function Ball(ghost, sangle, spos) {
                     if (allowance === true) {
                         allowance = false
                     } else{
-                        gameOver()
-                        resetPos()
-                        resetScore()
-                        angle = Math.random() * 180 + 180
-                        velocity = DEFAULTVELOCITY
-                        ghostBall = undefined
+                        if (!ghost) {
+                            gameOver()
+                            resetPos()
+                            resetScore()
+                            angle = Math.random() * 180 + 180
+                            velocity = DEFAULTVELOCITY
+                            ghostBall = undefined
+                        }
                     }
                 }
             } else if (x > canvas.width - PONGWIDTH) {
@@ -232,12 +234,16 @@ function Ball(ghost, sangle, spos) {
         if (angle > 135 && angle <= 180) angle = 135
         if (angle >= 180 && angle < 225) angle = 225
         if (angle <= 360 && angle > 315) angle = 315
-        if (x === prevx) resetPos()
-        prevx = x
-        ctx.fillStyle = '#f00'
-        if (ghost) ctx.fillStyle = '#000000'
-        ctx.fillRect(x, y, width, height)
-        if (!ghost) console.log(angle);
+        if (x === prevX) resetPos()
+        prevX = x
+        if (!ghost) {
+            ctx.fillStyle = '#f00'
+            ctx.fillRect(x, y, width, height)
+            console.log(angle);
+        } else {
+            ctx.fillStyle = '#000000'
+            // ctx.fillRect(x, y, width, height)
+        }
     }
     return {
         tick,
