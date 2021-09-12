@@ -109,7 +109,7 @@ const ball =(() => {
             console.log("touched");
             angle = 180 - angle
         }
-        if (collides(getBBox(), [[0,0], [PONGWIDTH-1, canvas.height]]) || x > canvas.width - PONGWIDTH) {
+        if (collides(getBBox(), [[-1000,0], [PONGWIDTH-1, canvas.height]]) || x > canvas.width - PONGWIDTH) {
             if (x < PONGWIDTH) {
                 if (collides(getBBox(), pong1.getBBox())) { // remove me and add scoring
                     let incidence = 180 - (360 - angle)
@@ -120,11 +120,11 @@ const ball =(() => {
                     let scale = (offset / (pong1.height/2))*-1
                     angle = (scale + 1) * 90
                     allowance = true
+                    velocity += 1
                 } else {
                     if (allowance === true) {
                         allowance = false
                     } else{
-                        console.log("b", x)
                         pscore += 1
                         resetPos()
                     }
@@ -133,7 +133,6 @@ const ball =(() => {
             } else if (x > canvas.width - PONGWIDTH) {
                 x = canvas.width - PONGWIDTH
                 if (collides(getBBox(), pong2.getBBox()) || true) { // remove me and add scoring
-                    console.log("touched pong2")
                     let incidence = 180 - angle
                     angle = 180 + incidence
 
