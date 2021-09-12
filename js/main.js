@@ -204,7 +204,7 @@ const ball =(() => {
             if (angle <= 360 && angle > 330) angle = 330
             // if (angle >= 90 && angle < 120) angle = 120
         }
-        ctx.fillStyle = '#fff'
+        ctx.fillStyle = '#f00'
         ctx.fillRect(x, y, width, height)
     }
     return {
