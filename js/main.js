@@ -21,14 +21,14 @@ function rtd(radians) {
 
 let pscore = 0
 
-let scoreCounter = document.querySelector('.score')
+let scoreCounters = document.querySelectorAll('.score')
 function incrementScore(){
     pscore += 1
-    scoreCounter.textContent = pscore
+    scoreCounters.forEach(v => v.textContent = pscore)
 }
 function resetScore() {
     pscore = 0
-    scoreCounter.textContent = pscore
+    scoreCounters.forEach(v => v.textContent = pscore)
 }
 
 /**
@@ -165,6 +165,7 @@ const ball =(() => {
                         resetPos()
                         resetScore()
                         velocity = DEFAULTVELOCITY
+                        gameOver()
                     }
                 }
             } else if (x > canvas.width - PONGWIDTH) {
@@ -195,6 +196,24 @@ const ball =(() => {
 let pong1 = Pong(true)
 let pong2 = Pong(false)
 
+let playing = false
+let startDiv = document.querySelector('div.message.start')
+let startButton = document.querySelector('button.start-game')
+startButton.addEventListener('click', e => {
+    startDiv.classList.toggle('hidden', true)
+    setTimeout(() => playing = true, 1500)
+})
+
+let gameOverDiv = document.querySelector('div.message.game-over')
+let gameOverButton = document.querySelector('button.game-over')
+gameOverButton.addEventListener('click', e => {
+    gameOverDiv.classList.toggle('hidden', true)
+    setTimeout(() => playing = false, 1500)
+})
+function gameOver() {
+    playing = false
+    gameOverDiv.classList.toggle('hidden', false)
+}
 
 setInterval(() => {
     ctx.fillStyle = '#000'
@@ -203,5 +222,7 @@ setInterval(() => {
     ctx.fillStyle = '#fff'
     pong1.tick()
     pong2.tick()
-    ball.tick()
+    if (playing) {
+        ball.tick()
+    }
 }, TICKRATE)

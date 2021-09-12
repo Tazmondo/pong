@@ -17,3 +17,17 @@ canvas {
     height: 500px;
     outline: 1px red solid;
 }
+
+.canvas-div {
+    position: relative;
+}
+
+.message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+}
