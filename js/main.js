@@ -8,10 +8,14 @@ const PONGHEIGHT = 60
 const PONGWIDTH = 10
 const BALLSIZE = 5
 const DEFAULTVELOCITY = 2
-let GHOSTVELOCITY = 3.5
 const VELINCREMENT = 0.2
 const TICKRATE = 1000/300
 const MOVESPEED = 3
+
+let strength = document.querySelector('.strength')
+const DEFAULTGHOSTVELOCITY = 2.5
+let ghostVelocity = DEFAULTGHOSTVELOCITY
+strength.textContent = ghostVelocity
 
 function dtr(degrees) {
     return degrees * (Math.PI/180)
@@ -74,6 +78,8 @@ function Pong(player1) {
         } else if (pressed['ArrowUp']) {
             mouseY -= MOVESPEED
         }
+        if (mouseY > canvas.height - height/2) mouseY = canvas.height - height/2
+        if (mouseY < height/2) mouseY = height/2
     })
 
     function getColor() {
@@ -137,14 +143,14 @@ function Pong(player1) {
     }
 }
 
-function Ball(ghost, sangle, spos) {
+function Ball(ghost, sAngle, sPos) {
     let width = BALLSIZE
     let height = BALLSIZE
 
-    let x = ghost ? spos[0] : canvas.width - PONGWIDTH - BALLSIZE;
-    let y = ghost ? spos[1] : (canvas.height / 2) + (PONGHEIGHT / 2);
-    let velocity = ghost ? GHOSTVELOCITY : DEFAULTVELOCITY
-    let angle = ghost ? sangle : Math.random() * 180 + 180
+    let x = ghost ? sPos[0] : canvas.width - PONGWIDTH - BALLSIZE;
+    let y = ghost ? sPos[1] : (canvas.height / 2) + (PONGHEIGHT / 2);
+    let velocity = ghost ? ghostVelocity : DEFAULTVELOCITY
+    let angle = ghost ? sAngle : Math.random() * 180 + 180
     let allowance = true
     let prevX = x
 
@@ -234,7 +240,14 @@ function Ball(ghost, sangle, spos) {
         if (angle > 135 && angle <= 180) angle = 135
         if (angle >= 180 && angle < 225) angle = 225
         if (angle <= 360 && angle > 315) angle = 315
-        if (x === prevX) resetPos()
+        if (x === prevX) {
+            win()
+            resetPos()
+            resetScore()
+            angle = Math.random() * 180 + 180
+            velocity = DEFAULTVELOCITY
+            ghostBall = undefined
+        }
         prevX = x
         if (!ghost) {
             ctx.fillStyle = '#f00'
@@ -282,6 +295,8 @@ function gameOver() {
     scoreText.textContent = pscore
     gameOverDiv.classList.toggle('hidden', false)
     gameOverButton.focus()
+    ghostVelocity = DEFAULTGHOSTVELOCITY
+    strength.textContent = ghostVelocity
 }
 
 let winButton = document.querySelector('.win button')
@@ -296,6 +311,8 @@ function win() {
     winScoreText.textContent = pscore
     winDiv.classList.toggle('hidden', false)
     winButton.focus()
+    ghostVelocity += 0.5
+    strength.textContent = ghostVelocity
 }
 
 setInterval(() => {
