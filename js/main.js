@@ -21,11 +21,11 @@ let aiscore = 0
 
 /**
  * Check if two objects collide
- * @param object1 {[[x1,y1],[x2,y2]]}
- * @param object2 {[[x1,y1],[x2,y2]]}
+ * @param object1 {[[number,number],[number,number]]} [[x1, y1], [x2, y2]]
+ * @param object2 {[[number, number], [number, number]]} [[x1, y1], [x2, y2]]
+ * @return boolean
  */
 function collides(object1, object2) {
-    console.log("yes")
     return object1[0][0] < object2[1][0] &&
         object1[1][0] > object2[0][0] &&
         object1[0][1] < object2[1][1] &&
@@ -65,7 +65,7 @@ function Pong(player1) {
                 if (y < 0) y = 0
                 else if (y > canvas.height-height) y = canvas.height-height
             } else {
-                y = ball.y - height/2
+                y = ball.getY() - height/2
                 if (y < 0) y = 0
                 else if (y > canvas.height-height) y = canvas.height-height
             }
@@ -75,76 +75,89 @@ function Pong(player1) {
     }
 }
 
-const ball = {
-    width: BALLSIZE,
-    height: BALLSIZE,
-    x: canvas.width - PONGWIDTH - BALLSIZE,
-    y: (canvas.height / 2) + (PONGHEIGHT / 2),
-    velocity: 7,
-    angle: 240,
-    allowance: true,
-    getBBox() {
+const ball =(() => {
+    let width = BALLSIZE
+    let height = BALLSIZE
+
+    let x = canvas.width - PONGWIDTH - BALLSIZE;
+    let y = (canvas.height / 2) + (PONGHEIGHT / 2);
+    let velocity = 7
+    let angle = 240
+    let allowance = true
+
+    function getBBox() {
         return [
-            [this.x, this.y],
-            [this.x + this.width, this.y + this.height]
+            [x, y],
+            [x + width, y + height]
         ]
-    },
-    resetPos() {
-        this.x = canvas.width - PONGWIDTH - BALLSIZE
-        this.y = (canvas.height / 2) + (PONGHEIGHT / 2)
-    },
-    tick: function tick() {
-        let yD = Math.cos(dtr(this.angle)) * this.velocity
-        let xD = Math.sin(dtr(this.angle)) * this.velocity
-        this.x += xD
-        this.y += yD
-        if (this.y < 0 || this.y > canvas.height) {
+    }
+
+    function resetPos() {
+        console.log("a2", x)
+
+        x = canvas.width - PONGWIDTH - BALLSIZE
+        console.log("a", x)
+        y = (canvas.height / 2) + (PONGHEIGHT / 2)
+    }
+
+    function tick() {
+        let yD = Math.cos(dtr(angle)) * velocity
+        let xD = Math.sin(dtr(angle)) * velocity
+        x += xD
+        y += yD
+        if (y < 0 || y > canvas.height) {
             console.log("touched");
-            this.angle = 180 - this.angle
+            angle = 180 - angle
         }
-        if (this.x < PONGWIDTH || this.x > canvas.width - PONGWIDTH) {
-            if (this.x < PONGWIDTH) {
-                if (collides(this.getBBox(), pong1.getBBox())) { // remove me and add scoring
-                    let incidence = 180 - (360 - this.angle)
-                    this.angle = 180 - incidence
+        if (collides(getBBox(), [[0,0], [PONGWIDTH-1, canvas.height]]) || x > canvas.width - PONGWIDTH) {
+            if (x < PONGWIDTH) {
+                if (collides(getBBox(), pong1.getBBox())) { // remove me and add scoring
+                    let incidence = 180 - (360 - angle)
+                    angle = 180 - incidence
 
                     let middle = pong1.getY() + pong1.height/2
-                    let offset = this.y - middle
+                    let offset = y - middle
                     let scale = (offset / (pong1.height/2))*-1
-                    this.angle = (scale + 1) * 90
-                    this.allowance = true
+                    angle = (scale + 1) * 90
+                    allowance = true
                 } else {
-                    if (this.allowance === true) {
-                        this.allowance = false
+                    if (allowance === true) {
+                        allowance = false
                     } else{
+                        console.log("b", x)
                         pscore += 1
-                        this.resetPos()
+                        resetPos()
                     }
                 }
-                this.x = PONGWIDTH - 1
-            } else if (this.x > canvas.width - PONGWIDTH) {
-                this.x = canvas.width - PONGWIDTH
-                if (collides(this.getBBox(), pong2.getBBox()) || true) { // remove me and add scoring
+                x = PONGWIDTH - 1
+            } else if (x > canvas.width - PONGWIDTH) {
+                x = canvas.width - PONGWIDTH
+                if (collides(getBBox(), pong2.getBBox()) || true) { // remove me and add scoring
                     console.log("touched pong2")
-                    let incidence = 180 - this.angle
-                    this.angle = 180 + incidence
+                    let incidence = 180 - angle
+                    angle = 180 + incidence
 
                     let middle = pong2.getY() + pong2.height/2
-                    let offset = this.y - middle
+                    let offset = y - middle
                     let scale = (offset / (pong1.height/2))*-1
-                    this.angle = 360 - (scale + 1) * 90
+                    angle = 360 - (scale + 1) * 90
                 }
             }
-            if (this.angle > 160 && this.angle <= 180) this.angle = 160
-            if (this.angle >= 0 && this.angle < 30) this.angle = 30
-            if (this.angle >= 180 && this.angle < 210) this.angle = 210
-            if (this.angle >= 90 && this.angle < 120) this.angle = 120
+            if (angle > 160 && angle <= 180) angle = 160
+            if (angle >= 0 && angle < 30) angle = 30
+            if (angle >= 180 && angle < 210) angle = 210
+            if (angle >= 90 && angle < 120) angle = 120
         }
         ctx.fillStyle = '#fff'
-        ctx.fillRect(this.x, this.y, this.width, this.height)
+        ctx.fillRect(x, y, width, height)
     }
-}
-
+    return {
+        tick,
+        getY() {
+            return y
+        }
+    }
+})()
 let pong1 = Pong(true)
 let pong2 = Pong(false)
 
