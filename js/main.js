@@ -4,7 +4,7 @@ let ctx = canvas.getContext('2d')
 canvas.height = canvas.clientHeight
 canvas.width = canvas.clientWidth
 
-const PONGHEIGHT = 40
+const PONGHEIGHT = 60
 const PONGWIDTH = 10
 const BALLSIZE = 5
 
@@ -82,6 +82,7 @@ const ball = {
     y: (canvas.height / 2) + (PONGHEIGHT / 2),
     velocity: 7,
     angle: 240,
+    allowance: true,
     getBBox() {
         return [
             [this.x, this.y],
@@ -103,7 +104,6 @@ const ball = {
         }
         if (this.x < PONGWIDTH || this.x > canvas.width - PONGWIDTH) {
             if (this.x < PONGWIDTH) {
-                this.x = PONGWIDTH - 1
                 if (collides(this.getBBox(), pong1.getBBox())) { // remove me and add scoring
                     let incidence = 180 - (360 - this.angle)
                     this.angle = 180 - incidence
@@ -112,11 +112,16 @@ const ball = {
                     let offset = this.y - middle
                     let scale = (offset / (pong1.height/2))*-1
                     this.angle = (scale + 1) * 90
-                    console.log(scale);
+                    this.allowance = true
                 } else {
-                    pscore += 1
-                    this.resetPos()
+                    if (this.allowance === true) {
+                        this.allowance = false
+                    } else{
+                        pscore += 1
+                        this.resetPos()
+                    }
                 }
+                this.x = PONGWIDTH - 1
             } else if (this.x > canvas.width - PONGWIDTH) {
                 this.x = canvas.width - PONGWIDTH
                 if (collides(this.getBBox(), pong2.getBBox()) || true) { // remove me and add scoring
