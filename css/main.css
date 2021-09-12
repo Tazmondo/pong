@@ -1,0 +1,18 @@
+body {
+    font-family: sans-serif;
+}
+
+.outside-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vw;
+    width: 100vw;
+}
+
+canvas {
+    width: 920px;
+    height: 500px;
+    outline: 1px red solid;
+}
