@@ -165,6 +165,7 @@ const ball =(() => {
         if (y < 0 || y > canvas.height) {
             // console.log("touched");
             angle = 180 - angle
+            y < 0 ? y = 0 : y = canvas.height
         }
         if (collides(getBBox(), [[-1000,0], [PONGWIDTH-1, canvas.height]]) || x > canvas.width - PONGWIDTH) {
             if (x < PONGWIDTH) {
@@ -198,6 +199,7 @@ const ball =(() => {
                 }
                 x = canvas.width - PONGWIDTH
             }
+            // Angles that are too steep are annoying/unfun
             if (angle >= 0 && angle < 30) angle = 30
             if (angle > 160 && angle <= 180) angle = 160
             if (angle >= 180 && angle < 210) angle = 210
