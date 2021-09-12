@@ -51,6 +51,8 @@ function Pong(player1) {
     let x = player1 ? 0 : canvas.width-width
     let y = canvas.height / 2 - height/2
 
+    let touched = Date.now()
+
     let mouseY = y
     canvas.addEventListener('mousemove', e => {
         mouseY = e.offsetY
@@ -73,6 +75,19 @@ function Pong(player1) {
         }
     })
 
+    function getColor() {
+        let end = 255
+        let start = 0
+
+        let time = 2
+        let difference = (Date.now() - touched) / 1000
+        let result = end
+        if (difference <= time) {
+            let scale = difference / time
+            result = (start+end) * scale
+        }
+        return `rgb(${result}, 255, ${result})`
+    }
 
     return {
         getX() {
@@ -106,9 +121,12 @@ function Pong(player1) {
                 if (y < 0) y = 0
                 else if (y > canvas.height-height) y = canvas.height-height
             }
-            ctx.fillStyle = '#fff'
+            ctx.fillStyle = getColor()
             ctx.fillRect(x, y, width, height)
-        }
+        },
+        touched() {
+            touched = Date.now()
+        },
     }
 }
 
@@ -150,7 +168,7 @@ const ball =(() => {
         }
         if (collides(getBBox(), [[-1000,0], [PONGWIDTH-1, canvas.height]]) || x > canvas.width - PONGWIDTH) {
             if (x < PONGWIDTH) {
-                if (collides(getBBox(), pong1.getBBox())) { // remove me and add scoring
+                if (collides(getBBox(), pong1.getBBox())) {
                     let middle = pong1.getY() + pong1.height/2
                     let offset = y - middle
                     let scale = (offset / ((pong1.height+40)/2))*-1
@@ -158,6 +176,7 @@ const ball =(() => {
                     allowance = true
                     velocity += VELINCREMENT
                     incrementScore()
+                    pong1.touched()
                 } else {
                     if (allowance === true) {
                         allowance = false
@@ -175,6 +194,7 @@ const ball =(() => {
                     let offset = y - middle
                     let scale = (offset / (pong1.height/2))*-1
                     angle = 360 - (scale + 1) * 90
+                    pong2.touched()
                 }
                 x = canvas.width - PONGWIDTH
             }

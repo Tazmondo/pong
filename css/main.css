@@ -1,5 +1,7 @@
 body {
     font-family: sans-serif;
+    background-color: black;
+    color: white;
 }
 
 .outside-container {
@@ -15,7 +17,7 @@ canvas {
     max-width: 80vw;
     width: 500px;
     height: 500px;
-    outline: 1px red solid;
+    outline: 5px white groove;
 }
 
 .canvas-div {
