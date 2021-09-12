@@ -56,6 +56,24 @@ function Pong(player1) {
         mouseY = e.offsetY
     })
 
+    const MOVESPEED = 2
+    let pressed = {}
+    document.addEventListener('keydown', e => {
+        pressed[e.key] = true
+    })
+    document.addEventListener('keyup', e => {
+        pressed[e.key] = false
+    })
+
+    setInterval(() => {
+        if (pressed['ArrowDown']) {
+            mouseY += MOVESPEED
+        } else if (pressed['ArrowUp']) {
+            mouseY -= MOVESPEED
+        }
+    })
+
+
     return {
         getX() {
             return x
@@ -73,8 +91,8 @@ function Pong(player1) {
                 ]
             } else {
                 return [
-                    [x, y],
-                    [10000, y+height]
+                    [x, y-5],
+                    [10000, y+height+5]
                 ]
             }
         },
@@ -112,10 +130,10 @@ const ball =(() => {
     }
 
     function resetPos() {
-        console.log("a2", x, velocity, angle)
+        // console.log("a2", x, velocity, angle)
 
         x = canvas.width - PONGWIDTH - BALLSIZE
-        console.log("a", x)
+        // console.log("a", x)
         y = (canvas.height / 2) + (PONGHEIGHT / 2)
         ctx.fillStyle = '#fff'
         ctx.fillRect(x, y, width, height)
@@ -127,7 +145,7 @@ const ball =(() => {
         x += xD
         y += yD
         if (y < 0 || y > canvas.height) {
-            console.log("touched");
+            // console.log("touched");
             angle = 180 - angle
         }
         if (collides(getBBox(), [[-1000,0], [PONGWIDTH-1, canvas.height]]) || x > canvas.width - PONGWIDTH) {
@@ -151,7 +169,7 @@ const ball =(() => {
                 }
             } else if (x > canvas.width - PONGWIDTH) {
                 if (collides(getBBox(), pong2.getBBox())) { // remove me and add scoring
-                    console.log("a");
+                    // console.log("a");
                     let middle = pong2.getY() + pong2.height/2
                     let offset = y - middle
                     let scale = (offset / (pong1.height/2))*-1
