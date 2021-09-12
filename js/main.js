@@ -68,8 +68,8 @@ function Pong(player1) {
         getBBox() {
             if (player1) {
                 return [
-                    [-1000, y],
-                    [x + width, y + height]
+                    [-1000, y-20],
+                    [x + width, y + height + 20]
                 ]
             } else {
                 return [
@@ -135,7 +135,7 @@ const ball =(() => {
                 if (collides(getBBox(), pong1.getBBox())) { // remove me and add scoring
                     let middle = pong1.getY() + pong1.height/2
                     let offset = y - middle
-                    let scale = (offset / (pong1.height/2))*-1
+                    let scale = (offset / ((pong1.height+40)/2))*-1
                     angle = (scale + 1) * 90
                     allowance = true
                     velocity += VELINCREMENT
